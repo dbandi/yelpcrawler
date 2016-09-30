@@ -42,12 +42,9 @@ router.get('/', function(req, res, next) {
                     scrapepagescount = 990; // Temp / 10
                 }
             });
-
+            console.log(scrapepagescount);
             (function myLoop (i) {
-                console.log(page);
-
                  setTimeout(function () {
-
                      var options = {
                          uri: 'https://www.yelp.co.uk/search?find_desc='+find+'&find_loc='+city+''+'&start='+page,
                          timeout: 5000,
@@ -85,10 +82,11 @@ router.get('/', function(req, res, next) {
                              scrapepage = false;
                              console.log("Done with URL");
                          }
-                         if (--i) myLoop(i);
-                 }, (Math.floor(Math.random() * 6000) + 3000 ));
 
-            })(10);
+                         if (--i) myLoop(i);
+                 }, (Math.floor(Math.random() * 60) + 30 ));
+
+            })(scrapepagescount / 10);
         })
         .catch(function (err) {
             // Crawling failed or Cheerio choked...
