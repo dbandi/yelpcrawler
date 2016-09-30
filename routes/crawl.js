@@ -9,7 +9,7 @@ var cheerio = require('cheerio');
 
 var city = "Chicago IL";
 var find = "Barbers";
-
+var filename = city.split(' ')[0] + find;
 city=city.replace(/ /g,",+");
 var page = 0;
 var scrapepage = true;
@@ -38,49 +38,57 @@ router.get('/', function(req, res, next) {
             $('.pagination-results-window').filter(function(){
                 scrapepagescount = Math.floor(($(this).text().trim().split(" ").pop()) / 10) * 10;
                 console.log(scrapepagescount);
-                /*if(scrapepagescount > 990){
-                    scrapepagescount = 990;
-                }*/
+                if(scrapepagescount > 990){
+                    scrapepagescount = 990; // Temp / 10
+                }
             });
 
-            while (scrapepage) {
+            (function myLoop (i) {
+                console.log(page);
 
-                var options = {
-                    uri: 'https://www.yelp.co.uk/search?find_desc='+find+'&find_loc='+city+''+'&start='+page,
-                    transform: function (body) {
-                        return cheerio.load(body);
-                    }
-                };
+                 setTimeout(function () {
 
-                page += 10;
+                     var options = {
+                         uri: 'https://www.yelp.co.uk/search?find_desc='+find+'&find_loc='+city+''+'&start='+page,
+                         timeout: 5000,
+                         transform: function (body) {
+                             return cheerio.load(body);
+                         }
+                     };
 
-                rp(options)
-                    .then(function ($) {
+                     page += 10;
 
-                        $('.biz-name').filter(function(){
-                            var biz_id = $(this).attr('href');
-                            link.push('https://www.yelp.co.uk' + biz_id);
+                     rp(options)
+                         .then(function ($) {
 
-                            id.push(biz_id.replace('/biz/',''));
-                        });
+                             $('.biz-name').filter(function(){
+                                 var biz_id = $(this).attr('href');
+                                 link.push('https://www.yelp.co.uk' + biz_id);
 
-                        scrape_data = link;
+                                 id.push(biz_id.replace('/biz/',''));
+                             });
 
-                        fs.writeFile('output.json', JSON.stringify(scrape_data, null, 4), function(err){
-                            console.log('File successfully written! - Check your project directory for the output.json file');
-                        });
+                             scrape_data = link;
 
-                        res.send('Go to Crawl Details!')
-                    })
-                    .catch(function (err) {
-                        // Crawling failed or Cheerio choked...
-                        scrapepage = false;
-                    });
+                             fs.writeFile('output.json', JSON.stringify(scrape_data, null, 4), function(err){
+                                 //console.log('File successfully written! - Check your project directory for the output.json file');
+                             });
 
-                    if(page == scrapepagescount){
-                        scrapepage = false;
-                    }
-            }
+                             res.send('Go to Crawl Details!')
+                         })
+                         .catch(function (err) {
+                             // Crawling failed or Cheerio choked...
+                             scrapepage = false;
+                         });
+
+                         if(page >= scrapepagescount){
+                             scrapepage = false;
+                             console.log("Done with URL");
+                         }
+                         if (--i) myLoop(i);
+                 }, (Math.floor(Math.random() * 6000) + 3000 ));
+
+            })(10);
         })
         .catch(function (err) {
             // Crawling failed or Cheerio choked...

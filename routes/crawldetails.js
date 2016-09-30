@@ -7,11 +7,6 @@ var rp = require('request-promise');
 var request = require('request');
 var cheerio = require('cheerio');
 
-var city = "Chicago IL";
-var state = "IL";
-var find = "Barbers";
-
-city=city.replace(/ /g,"%2C+");
 var page = 0;
 var scrapepage = true;
 var limitTo = 200;
